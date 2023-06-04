@@ -7,14 +7,14 @@ const login = async (req, res) => {
   try {
     const userData = await users.findOne({ email });
     if (userData) {
-        console.log(userData);
+        // console.log(userData);
       if (userData.is_admin) {
         const passwordCheck = await bcrypt.compare(password, userData.password);
         if (passwordCheck) {
           const token = jwt.sign({ id: userData._id }, "adminSecrectkey", {
             expiresIn: "2d",
           });
-          res.json({ status: true, message: "success", token });
+          res.json({ status: true, message: "success", token,name:userData.name,id:userData._id });
         } else {
           res.json({ status: false, message: "password mismatch" });
         }
@@ -43,7 +43,7 @@ const home = async(req,res)=>{
 const deleteUser = async(req,res)=>{
   try {
     const user = await users.findByIdAndDelete(req.body.id)
-    if(user) return res.json({status:true})
+    if(user) return res.status(200).json({status:true,user})
   } catch (error) {
     console.log(error);
   }
@@ -78,11 +78,20 @@ const updateUser = async(req,res)=>{
     console.log(error.message);
   }
 }
+const tokenVerification = (req,res)=>{
+  try {
+    
+    res.json({status: true,name:req.user.name})
+  } catch (error) {
+    console.log(error.message);
+  }
+}
 
 module.exports = {
   login,
   home,
   deleteUser,
   updateUser,
-  userDetails
+  userDetails,
+  tokenVerification
 };
